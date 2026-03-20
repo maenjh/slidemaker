@@ -70,6 +70,10 @@ def get_images_directory():
 
 
 def get_exports_directory():
+    # Use project-local output directory (../output relative to backend/)
+    project_output = os.path.join(os.pardir, "output")
+    if os.path.isdir(project_output):
+        return os.path.abspath(project_output)
     export_directory = os.path.join(get_app_data_directory_env(), "exports")
     os.makedirs(export_directory, exist_ok=True)
     return export_directory
