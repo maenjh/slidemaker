@@ -12,7 +12,7 @@ dev:
 	mkdir -p "$$APP_DATA_DIRECTORY" "$$TEMP_DIRECTORY"; \
 	export USER_CONFIG_PATH="$$APP_DATA_DIRECTORY/userConfig.json"; \
 	\
-	python3 -c "import json,os; cfg={'LLM':'anthropic','ANTHROPIC_API_KEY':os.environ.get('ANTHROPIC_API_KEY',''),'DISABLE_IMAGE_GENERATION':True}; open(os.environ['USER_CONFIG_PATH'],'w').write(json.dumps(cfg))"; \
+	python3 -c "import json,os; cfg={'LLM':'anthropic','ANTHROPIC_API_KEY':os.environ.get('ANTHROPIC_API_KEY',''),'IMAGE_PROVIDER':'gpt-image-1.5','OPENAI_API_KEY':os.environ.get('OPENAI_API_KEY',''),'DISABLE_IMAGE_GENERATION':False}; open(os.environ['USER_CONFIG_PATH'],'w').write(json.dumps(cfg))"; \
 	echo "userConfig.json created at $$USER_CONFIG_PATH"; \
 	\
 	cleanup() { \
