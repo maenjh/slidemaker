@@ -101,3 +101,7 @@ make clean
 | `LLM` | `anthropic` | 슬라이드 콘텐츠 생성용 LLM |
 | `IMAGE_PROVIDER` | `gpt-image-1.5` | 슬라이드 이미지 생성 모델 |
 | `DISABLE_IMAGE_GENERATION` | `false` | 이미지 생성 활성화 여부 |
+
+## 참고
+
+이 프로젝트의 `backend/`와 `frontend/`는 오픈소스 AI 프레젠테이션 생성기인 [Presenton](https://github.com/AJV009/presenton)을 기반으로 합니다. Slidemaker는 방송 스크립트에 특화된 콘텐츠 추출 파이프라인(Claude)과 업로드 브릿지 서버를 추가하여 Presenton의 슬라이드 생성/편집 엔진을 활용합니다.
