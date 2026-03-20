@@ -15,6 +15,11 @@ export function ConfigurationInitializer({ children }: { children: React.ReactNo
   const router = useRouter();
   const route = usePathname();
 
+  // Skip config check for pdf-maker (used by Puppeteer for PPTX export)
+  if (route === '/pdf-maker') {
+    return <>{children}</>;
+  }
+
   // Fetch user config state
   useEffect(() => {
     fetchUserConfigState();
