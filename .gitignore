@@ -11,7 +11,7 @@ frontend/.next-build/
 .env
 .dev-pids
 uploads/
-output/
+output/**
 /tmp/slidemaker_data/
 /tmp/presenton/
 

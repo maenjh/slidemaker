@@ -26,15 +26,61 @@ slidemaker/
 └── .env                    # API 키 설정
 ```
 
-## 동작 흐름
+## 작동 방식
 
-1. 사용자가 `localhost:3001`에서 스크립트 파일 업로드
-2. **Claude**가 스크립트를 분석하여 슬라이드별 구조화된 콘텐츠 추출
-3. 추출된 콘텐츠를 마크다운으로 변환 후 **FastAPI** 백엔드에 전달
-4. 백엔드가 LLM으로 슬라이드 콘텐츠 생성 + OpenAI로 이미지 생성
-5. **Puppeteer**가 Next.js의 pdf-maker 페이지를 렌더링하여 PPTX 모델 추출
-6. 최종 PPTX 파일을 `output/` 디렉토리에 저장
-7. 생성 완료 후 `localhost:3000/presentation?id=XXX`에서 슬라이드 편집 가능
+시스템은 세 개의 독립 서버가 협력하는 구조입니다:
+
+- **Slidemaker 브릿지** (Express, port 3001) — 파일 업로드를 받아 Claude로 콘텐츠를 추출하고, 백엔드에 PPTX 생성을 요청하는 중간 서버
+- **Presenton 백엔드** (FastAPI, port 8000) — 슬라이드 콘텐츠 생성, 이미지 생성, PPTX 파일 조립을 담당
+- **Presenton 프론트엔드** (Next.js, port 3000) — 생성된 프레젠테이션의 편집 UI 및 Puppeteer를 통한 PPTX 모델 렌더링
+
+### 파이프라인
+
+```mermaid
+flowchart TD
+    A["👤 사용자\n.docx / .txt / .md 업로드"] -->|POST /api/generate-pptx| B["📦 Express 브릿지 서버\n:3001"]
+
+    subgraph stage1 ["Stage 1 — 텍스트 추출"]
+        B --> C{파일 형식?}
+        C -->|.docx| D[mammoth로 텍스트 추출]
+        C -->|.txt / .md| E[파일 직접 읽기]
+        D --> F[원본 스크립트 텍스트]
+        E --> F
+    end
+
+    subgraph stage2 ["Stage 2 — AI 콘텐츠 구조화"]
+        F -->|프롬프트 + 스크립트| G["🤖 Claude API\n(claude-sonnet-4)"]
+        G -->|JSON 응답| H["구조화된 슬라이드 데이터\n(slide_1 ~ slide_8)"]
+        H --> I["slides_markdown 변환\n(각 슬라이드를 마크다운으로)"]
+    end
+
+    subgraph stage3 ["Stage 3 — PPTX 생성"]
+        I -->|slides_markdown + 설정| J["🔧 FastAPI 백엔드\n:8000"]
+        J --> K["LLM으로 슬라이드\n콘텐츠 보강"]
+        J --> L["OpenAI로\n이미지 생성"]
+        K --> M["PPTX 조립"]
+        L --> M
+        M --> N["Next.js :3000\nPuppeteer PPTX 모델 렌더링"]
+        N --> O["📄 최종 PPTX 파일\n(output/)"]
+    end
+
+    O --> P["✏️ 편집 가능\nlocalhost:3000/presentation?id=XXX"]
+
+    style stage1 fill:#f0f9ff,stroke:#3b82f6
+    style stage2 fill:#fdf4ff,stroke:#a855f7
+    style stage3 fill:#f0fdf4,stroke:#22c55e
+```
+
+### 상세 동작 흐름
+
+1. 사용자가 `localhost:3001`에서 스크립트 파일(.docx, .txt, .md)을 업로드
+2. Express 브릿지가 파일에서 텍스트를 추출 (docx는 mammoth, 나머지는 직접 읽기)
+3. 추출된 텍스트를 **Claude API**에 전달하여 8개 슬라이드 구조(제목, 비교, 그리드, 타임라인 등)로 구조화된 JSON 추출
+4. JSON을 슬라이드별 마크다운으로 변환 후 **FastAPI 백엔드** `/api/v1/ppt/presentation/generate` 호출
+5. 백엔드가 LLM으로 슬라이드 콘텐츠를 보강하고, OpenAI로 슬라이드 이미지를 생성
+6. **Puppeteer**가 Next.js의 pdf-maker 페이지를 렌더링하여 PPTX 모델 추출
+7. 최종 PPTX 파일을 `output/` 디렉토리에 저장
+8. 생성 완료 후 `localhost:3000/presentation?id=XXX`에서 슬라이드 편집 가능
 
 ## 사전 요구사항
 
