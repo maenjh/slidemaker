@@ -1,11 +1,28 @@
+## Dependencies
 node_modules/
-uploads/
-.env
-.dev-pids
 backend/.venv/
-**/__pycache__/
 frontend/node_modules/
+
+## Build output
 frontend/.next/
 frontend/.next-build/
+
+## Runtime / data
+.env
+.dev-pids
+uploads/
 output/
+/tmp/slidemaker_data/
+/tmp/presenton/
+
+## Database / vector store (runtime-generated)
+backend/container.db
+backend/chroma/
+
+## Python
+**/__pycache__/
+*.pyc
+
+## IDE / tools
 .claude/
+.DS_Store
